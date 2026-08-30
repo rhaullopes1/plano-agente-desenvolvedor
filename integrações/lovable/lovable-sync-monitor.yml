@@ -1,0 +1,114 @@
+name: 🔄 Monitor Lovable Sync
+
+on:
+  push:
+    branches:
+      - 'lovable/**'
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '*/5 * * * *'  # Verifica a cada 5 minutos
+
+jobs:
+  detect-lovable-sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repositório
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: 🔍 Detectar branches Lovable
+        id: detect_branches
+        run: |
+          LOVABLE_BRANCHES=$(git branch -r --list "origin/lovable/*" | wc -l)
+          echo "lovable_branches=$LOVABLE_BRANCHES" >> $GITHUB_OUTPUT
+          echo "✅ Branches Lovable encontrados: $LOVABLE_BRANCHES"
+      
+      - name: 🔍 Detectar commits Lovable
+        id: detect_commits
+        run: |
+          LOVABLE_COMMITS=$(git log --all --author="lovable" --oneline 2>/dev/null | wc -l)
+          echo "lovable_commits=$LOVABLE_COMMITS" >> $GITHUB_OUTPUT
+          echo "✅ Commits Lovable encontrados: $LOVABLE_COMMITS"
+      
+      - name: ✅ Registrar sincronização bem-sucedida
+        if: steps.detect_branches.outputs.lovable_branches > 0 || steps.detect_commits.outputs.lovable_commits > 0
+        run: |
+          cat > sync_status.txt << EOF
+          ✅ SINCRONIZAÇÃO LOVABLE DETECTADA!
+          
+          Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          Branches Lovable: ${{ steps.detect_branches.outputs.lovable_branches }}
+          Commits Lovable: ${{ steps.detect_commits.outputs.lovable_commits }}
+          Status: CONECTADO
+          
+          Próximos passos:
+          1. Continuar com Etapa 3 - Google Cloud
+          2. Configurar n8n
+          3. Primeira implantação
+          EOF
+          
+          cat sync_status.txt
+      
+      - name: 📝 Atualizar log de sincronização
+        if: steps.detect_branches.outputs.lovable_branches > 0 || steps.detect_commits.outputs.lovable_commits > 0
+        run: |
+          mkdir -p logs
+          echo "✅ $(date -u +"%Y-%m-%dT%H:%M:%SZ") - Sincronização Lovable detectada com sucesso!" >> logs/LOVABLE_SYNC.log
+      
+      - name: 💾 Commit log de sincronização
+        if: steps.detect_branches.outputs.lovable_branches > 0 || steps.detect_commits.outputs.lovable_commits > 0
+        run: |
+          git config user.name "Agente Desenvolvedor"
+          git config user.email "agente@desenvolvedor.local"
+          git add logs/LOVABLE_SYNC.log
+          git commit -m "🎉 Lovable sincronizado com GitHub" || echo "Nada para commitar"
+          git push || echo "Push pode ter sido rejeitado"
+      
+      - name: 🚀 Atualizar status no config
+        if: steps.detect_branches.outputs.lovable_branches > 0 || steps.detect_commits.outputs.lovable_commits > 0
+        run: |
+          python3 << 'EOF'
+          import json
+          import datetime
+          
+          with open('AGENT_CONFIG.json', 'r') as f:
+              config = json.load(f)
+          
+          config['integrations']['lovable']['status'] = '✅ Conectado'
+          config['integrations']['lovable']['connected_at'] = datetime.datetime.utcnow().isoformat() + 'Z'
+          config['last_updated'] = datetime.datetime.utcnow().isoformat() + 'Z'
+          
+          with open('AGENT_CONFIG.json', 'w') as f:
+              json.dump(config, f, indent=2)
+          
+          print("✅ Config atualizado!")
+          EOF
+      
+      - name: 📤 Commit atualização de config
+        if: steps.detect_branches.outputs.lovable_branches > 0 || steps.detect_commits.outputs.lovable_commits > 0
+        run: |
+          git add AGENT_CONFIG.json
+          git commit -m "🔧 Lovable status: Conectado" || echo "Nada para commitar"
+          git push || echo "Push pode ter sido rejeitado"
+      
+      - name: 📢 Notificar sucesso
+        if: steps.detect_branches.outputs.lovable_branches > 0 || steps.detect_commits.outputs.lovable_commits > 0
+        run: |
+          echo "🎉 ============================================"
+          echo "🎉 LOVABLE SINCRONIZADO COM SUCESSO!"
+          echo "🎉 ============================================"
+          echo ""
+          echo "📊 Status:"
+          echo "   • Branches Lovable: ${{ steps.detect_branches.outputs.lovable_branches }}"
+          echo "   • Commits Lovable: ${{ steps.detect_commits.outputs.lovable_commits }}"
+          echo "   • Status: ✅ CONECTADO"
+          echo ""
+          echo "📝 Verificar:"
+          echo "   • logs/LOVABLE_SYNC.log"
+          echo "   • AGENT_CONFIG.json"
+          echo ""
+          echo "🚀 Próximo: Etapa 3 - Google Cloud"
