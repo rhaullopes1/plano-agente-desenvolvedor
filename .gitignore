@@ -1,0 +1,33 @@
+# Credenciais e Secrets
+.env
+.env.local
+.env.*.local
+secrets.json
+credentials.json
+*.key
+*.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# Gerenciador de agentes
+agent-cache/
+.agent-state/
