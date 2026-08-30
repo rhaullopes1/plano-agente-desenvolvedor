@@ -1,0 +1,55 @@
+{
+  "agent": {
+    "name": "Agente Desenvolvedor",
+    "version": "1.0.0",
+    "description": "Agente que constrói e mantém projetos automaticamente",
+    "status": "Em configuração"
+  },
+  "github": {
+    "repository": "rhaullopes1/plano-agente-desenvolvedor",
+    "default_branch": "main",
+    "branches": {
+      "main": "Produção",
+      "setup/*": "Configuração",
+      "features/*": "Novas funcionalidades",
+      "fixes/*": "Correções de bugs",
+      "docs/*": "Documentação"
+    },
+    "auto_merge": false,
+    "require_status_checks": true
+  },
+  "integrations": {
+    "lovable": {
+      "status": "⏳ Pendente",
+      "token_required": true,
+      "connected_at": null
+    },
+    "google_cloud": {
+      "status": "⏳ Pendente",
+      "project_id": null,
+      "connected_at": null
+    },
+    "n8n": {
+      "status": "⏳ Pendente",
+      "url": null,
+      "connected_at": null
+    }
+  },
+  "rules": {
+    "require_authorization": [
+      "login",
+      "token_generation",
+      "permission_grant",
+      "credential_storage"
+    ],
+    "auto_fix": true,
+    "auto_document": true,
+    "auto_deploy": false
+  },
+  "limits": {
+    "max_concurrent_tasks": 3,
+    "max_file_size_mb": 100,
+    "rate_limit_requests_per_hour": 1000
+  },
+  "last_updated": "2026-08-30T11:10:00Z"
+}
